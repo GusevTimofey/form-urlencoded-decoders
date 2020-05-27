@@ -1,7 +1,6 @@
 package tests
 
 import cats.data.Chain
-import cats.syntax.either._
 import io.circe.Json
 import io.circe.parser.parse
 

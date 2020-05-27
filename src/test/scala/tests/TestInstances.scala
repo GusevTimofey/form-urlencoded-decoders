@@ -5,6 +5,7 @@ import io.circe.Json
 import io.circe.parser.parse
 
 object TestInstances {
+
   final case class RequestForm(
     user: String,
     password: Int,

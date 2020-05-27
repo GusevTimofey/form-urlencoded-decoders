@@ -1,33 +1,24 @@
 package ru.mail.decoders
 
-import cats.Applicative
-import io.circe.Json
-import tofu.Raise
-import tofu.syntax.raise._
-import io.circe.parser.parse
 import cats.syntax.either._
+import io.circe.Json
+import io.circe.parser.parse
+import ru.mail.decoders.UrlFormDecoderError.{ JsonParsingFailed, NumberCastFailed }
 
-trait StringDecoder[F[_, _], R] {
-  def from(s: String): F[String, R]
+trait StringDecoder[R] {
+  def apply(s: String): Either[UrlFormDecoderError, R]
 }
 
 object StringDecoder {
-  implicit def intDecoder[F[_, _]](
-    implicit F: Applicative[F[String, *]],
-    R: Raise[F[String, *], String]
-  ): StringDecoder[F, Int] = (s: String) => s.toIntOption.orRaise(s"Cannot decoder '$s' as 'Int'")
+  implicit final val intDecoder: StringDecoder[Int] =
+    (s: String) => Either.fromOption(s.toIntOption, NumberCastFailed(s"Failed to cast $s to Int"))
 
-  implicit def stringDecoder[F[_, _]](
-    implicit F: Applicative[F[String, *]]
-  ): StringDecoder[F, String] = (s: String) => F.pure(s)
+  implicit final val stringDecoder: StringDecoder[String] = (s: String) => s.asRight[UrlFormDecoderError]
 
-  implicit def longDecoder[F[_, _]](
-    implicit F: Applicative[F[String, *]],
-    R: Raise[F[String, *], String]
-  ): StringDecoder[F, Long] = (s: String) => s.toLongOption.orRaise(s"Cannot decode '$s' as 'Long'")
+  implicit final val longDecoder: StringDecoder[Long] = (s: String) =>
+    Either.fromOption(s.toLongOption, NumberCastFailed(s"Failed to cast $s to Long"))
 
-  implicit def jsonDecoder[F[_, _]](
-    implicit F: Applicative[F[String, *]],
-    R: Raise[F[String, *], String]
-  ): StringDecoder[F, Json] = (s: String) => parse(s).leftMap(_.message).toRaise
+  implicit final val jsonDecoder: StringDecoder[Json] = (s: String) =>
+    parse(s).leftMap(err => JsonParsingFailed(err.message))
+
 }

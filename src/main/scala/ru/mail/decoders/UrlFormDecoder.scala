@@ -1,53 +1,42 @@
 package ru.mail.decoders
 
 import cats.data.Chain
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import cats.{ Applicative, Functor, Monad }
+import cats.syntax.either._
+import ru.mail.decoders.UrlFormDecoderError.DecoderErrorWithKey
 import shapeless._
 import shapeless.labelled.{ field, FieldType }
-import tofu.syntax.handle._
-import tofu.syntax.raise._
-import tofu.{ HandleTo, Raise }
 
-trait UrlFormDecoder[F[_, _], T] {
-  def decode(fields: Map[String, Chain[String]]): F[String, T]
+trait UrlFormDecoder[T] {
+  def decode(fields: Map[String, Chain[String]]): Either[UrlFormDecoderError, T]
 }
 
 object UrlFormDecoder {
-  def apply[F[_, _], T](implicit env: UrlFormDecoder[F, T]): UrlFormDecoder[F, T] =
+  def apply[T](implicit env: UrlFormDecoder[T]): UrlFormDecoder[T] =
     env
 
-  implicit def hnilDecoder[F[_, _]](
-    implicit F: Applicative[F[String, *]]
-  ): UrlFormDecoder[F, HNil] =
-    (_: Map[String, Chain[String]]) => F.pure(HNil)
+  implicit def hnilDecoder: UrlFormDecoder[HNil] =
+    (_: Map[String, Chain[String]]) => HNil.asRight[UrlFormDecoderError]
 
-  implicit def hlistDecoder[F[_, _], Key <: Symbol, Head, Tail <: HList](
-    implicit F: Monad[F[String, *]],
-    FE: HandleTo[F[String, *], F[String, *], String],
-    R: Raise[F[String, *], String],
-    witness: Witness.Aux[Key],
-    headDecoder: Lazy[FormDecoder[F, Head]],
-    tailDecoder: UrlFormDecoder[F, Tail]
-  ): UrlFormDecoder[F, FieldType[Key, Head] :: Tail] =
+  implicit def hlistDecoder[Key <: Symbol, Head, Tail <: HList](
+    implicit witness: Witness.Aux[Key],
+    headDecoder: Lazy[FormDecoder[Head]],
+    tailDecoder: UrlFormDecoder[Tail]
+  ): UrlFormDecoder[FieldType[Key, Head] :: Tail] =
     (fields: Map[String, Chain[String]]) => {
       val fieldKey: String         = witness.value.name
       val fieldValue: List[String] = fields.getOrElse(fieldKey, Chain.empty).toList
       for {
-        head <- headDecoder.value.from(fieldValue).handleWith { err: String =>
-                 s"Error has occurred for key '$fieldKey': $err.".raise
-               }
+        head <- headDecoder
+                 .value(fieldValue)
+                 .leftMap(err => DecoderErrorWithKey(s"For key '$fieldKey' error: ~ ${err.msg} ~ has occurred."))
         tail <- tailDecoder.decode(fields)
       } yield field[Key](head) :: tail
     }
 
-  implicit def genericDecoder[F[_, _], T, H](
+  implicit def genericDecoder[T, H](
     implicit generic: LabelledGeneric.Aux[T, H],
-    F: Functor[F[String, *]],
-    R: Raise[F[String, *], String],
-    headDecoder: Lazy[UrlFormDecoder[F, H]]
-  ): UrlFormDecoder[F, T] =
+    headDecoder: Lazy[UrlFormDecoder[H]]
+  ): UrlFormDecoder[T] =
     (fields: Map[String, Chain[String]]) => headDecoder.value.decode(fields).map(generic.from)
 
 }

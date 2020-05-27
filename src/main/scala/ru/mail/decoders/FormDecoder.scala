@@ -1,43 +1,30 @@
 package ru.mail.decoders
 
-import cats.Applicative
+import cats.instances.either._
 import cats.instances.list._
-import cats.syntax.functor._
+import cats.syntax.either._
 import cats.syntax.option._
 import cats.syntax.traverse._
-import tofu.Raise
-import tofu.syntax.raise._
+import ru.mail.decoders.UrlFormDecoderError.EmptyInput
 
-trait FormDecoder[F[_, _], A] {
-  def from(s: List[String]): F[String, A]
+trait FormDecoder[A] {
+  def apply(s: List[String]): Either[UrlFormDecoderError, A]
 }
 
 object FormDecoder {
-  def apply[F[_, _], A](implicit env: FormDecoder[F, A]): FormDecoder[F, A] =
+  def apply[A](implicit env: FormDecoder[A]): FormDecoder[A] =
     env
 
-  implicit def valueFormDecoder[F[_, _], R](
-    implicit F: Applicative[F[String, *]],
-    R: Raise[F[String, *], String],
-    d: StringDecoder[F, R]
-  ): FormDecoder[F, R] = {
-    case head :: _ => d.from(head)
-    case Nil       => s"Empty input".raise
+  implicit def valueFormDecoder[R](implicit d: StringDecoder[R]): FormDecoder[R] = {
+    case head :: _ => d(head)
+    case Nil       => EmptyInput("No such value found").asLeft[R]
   }
 
-  implicit def optionFormDecoder[F[_, _], R](
-    implicit F: Applicative[F[String, *]],
-    R: Raise[F[String, *], String],
-    d: StringDecoder[F, R]
-  ): FormDecoder[F, Option[R]] = {
-    case head :: _ => d.from(head).map(_.some)
-    case Nil       => F.pure(none[R])
+  implicit def optionFormDecoder[R](implicit d: StringDecoder[R]): FormDecoder[Option[R]] = {
+    case head :: _ => d(head).map(_.some)
+    case Nil       => none[R].asRight[UrlFormDecoderError]
   }
 
-  implicit def listFormDecoder[F[_, _], R](
-    implicit F: Applicative[F[String, *]],
-    R: Raise[F[String, *], String],
-    d: StringDecoder[F, R]
-  ): FormDecoder[F, List[R]] = _.traverse(d.from)
+  implicit def listFormDecoder[R](implicit d: StringDecoder[R]): FormDecoder[List[R]] = _.traverse(d(_))
 
 }

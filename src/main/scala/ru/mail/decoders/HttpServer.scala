@@ -29,7 +29,6 @@ object HttpServer {
 
     val routes: HttpRoutes[F] = HttpRoutes.of[F] {
       case res @ POST -> Root / "test" =>
-        import cats.instances.either._
         implicit val decoder: EntityDecoder[F, Test] = formOf[F, Test]
         for {
           v <- res.as[Test]

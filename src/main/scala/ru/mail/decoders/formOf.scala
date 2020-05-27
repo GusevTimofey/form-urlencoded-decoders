@@ -1,4 +1,4 @@
-package test
+package ru.mail.decoders
 
 import cats.effect.Sync
 import org.http4s._

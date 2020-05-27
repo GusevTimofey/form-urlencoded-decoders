@@ -1,4 +1,4 @@
-package test
+package ru.mail.decoders
 
 import cats.Applicative
 import io.circe.Json
@@ -30,5 +30,4 @@ object StringDecoder {
     implicit F: Applicative[F[String, *]],
     R: Raise[F[String, *], String]
   ): StringDecoder[F, Json] = (s: String) => parse(s).leftMap(_.message).toRaise
-
 }

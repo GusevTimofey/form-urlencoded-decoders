@@ -3,9 +3,7 @@ package tests
 import cats.implicits._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import test.UrlFormDecoder
-import test.UrlFormDecoder.urlFormDecoderInstances._
-import test.FormDecoder.instances._
+import ru.mail.decoders.UrlFormDecoder
 import tests.TestInstances.{ RequestForm, _ }
 
 class DecoderTests extends AnyWordSpecLike with Matchers {

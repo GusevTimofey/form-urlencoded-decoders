@@ -1,4 +1,4 @@
-package test
+package ru.mail.decoders
 
 import cats.data.Kleisli
 import cats.effect.{ Concurrent, ConcurrentEffect, Sync, Timer }
@@ -9,8 +9,8 @@ import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.server.blaze._
 import org.http4s.{ HttpRoutes, _ }
-import test.Appl.Test
-import test.formOf._
+import ru.mail.decoders.Application.Test
+import ru.mail.decoders.formOf._
 
 import scala.concurrent.ExecutionContext
 
@@ -29,8 +29,6 @@ object HttpServer {
 
     val routes: HttpRoutes[F] = HttpRoutes.of[F] {
       case res @ POST -> Root / "test" =>
-        import test.UrlFormDecoder.urlFormDecoderInstances._
-        import test.FormDecoder.instances._
         import cats.instances.either._
         implicit val decoder: EntityDecoder[F, Test] = formOf[F, Test]
         for {

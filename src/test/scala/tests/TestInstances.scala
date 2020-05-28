@@ -96,11 +96,11 @@ object TestInstances {
 
   val correctWithEmptyListsFieldsInput: Map[String, Chain[String]] =
     Map(
-      "user"       -> Chain("User_Field"),
-      "password"   -> Chain("1234567890"),
-      "amount"     -> Chain("987654321"),
-      "jsonField"  -> Chain("""{"json" : "123"}"""),
-      "argsLong"   -> Chain("123", "456", "34875")
+      "user"      -> Chain("User_Field"),
+      "password"  -> Chain("1234567890"),
+      "amount"    -> Chain("987654321"),
+      "jsonField" -> Chain("""{"json" : "123"}"""),
+      "argsLong"  -> Chain("123", "456", "34875")
     )
 
   val correctWithEmptyListsFieldsOutput: RequestForm = RequestForm(
@@ -118,38 +118,38 @@ object TestInstances {
 
   val incorrectWithIncorrectKeyFieldsInput: Map[String, Chain[String]] =
     Map(
-      "user"       -> Chain("User_Field"),
-      "password"   -> Chain("1234567890"),
-      "amount"     -> Chain("987654321"),
-      "key"        -> Chain("qwe"),
-      "jsonField"  -> Chain("""{"json" : "123"}"""),
-      "argsLong"   -> Chain("123", "456", "34875")
+      "user"      -> Chain("User_Field"),
+      "password"  -> Chain("1234567890"),
+      "amount"    -> Chain("987654321"),
+      "key"       -> Chain("qwe"),
+      "jsonField" -> Chain("""{"json" : "123"}"""),
+      "argsLong"  -> Chain("123", "456", "34875")
     )
 
   val incorrectWithoutMandatoryPasswordFieldsInput: Map[String, Chain[String]] =
     Map(
-      "user"       -> Chain("User_Field"),
-      "amount"     -> Chain("987654321"),
-      "jsonField"  -> Chain("""{"json" : "123"}"""),
-      "argsLong"   -> Chain("123", "456", "34875")
+      "user"      -> Chain("User_Field"),
+      "amount"    -> Chain("987654321"),
+      "jsonField" -> Chain("""{"json" : "123"}"""),
+      "argsLong"  -> Chain("123", "456", "34875")
     )
 
   val incorrectWithInconsistentAmountFieldsInput: Map[String, Chain[String]] =
     Map(
-      "user"       -> Chain("User_Field"),
-      "password"   -> Chain("1234567890"),
-      "amount"     -> Chain("acvbdkfks"),
-      "jsonField"  -> Chain("""{"json" : "123"}"""),
-      "argsLong"   -> Chain("123", "456", "34875")
+      "user"      -> Chain("User_Field"),
+      "password"  -> Chain("1234567890"),
+      "amount"    -> Chain("acvbdkfks"),
+      "jsonField" -> Chain("""{"json" : "123"}"""),
+      "argsLong"  -> Chain("123", "456", "34875")
     )
 
   val incorrectWithInconsistentJsonFieldsInput: Map[String, Chain[String]] =
     Map(
-      "user"       -> Chain("User_Field"),
-      "password"   -> Chain("1234567890"),
-      "amount"     -> Chain("987654321"),
-      "jsonField"  -> Chain(""""{"json" : "123"}""""),
-      "argsLong"   -> Chain("123", "456", "34875")
+      "user"      -> Chain("User_Field"),
+      "password"  -> Chain("1234567890"),
+      "amount"    -> Chain("987654321"),
+      "jsonField" -> Chain(""""{"json" : "123"}""""),
+      "argsLong"  -> Chain("123", "456", "34875")
     )
 
 }

@@ -2,7 +2,7 @@ package ru.mail.decoders
 
 import cats.data.Chain
 import cats.syntax.either._
-import ru.mail.decoders.UrlFormDecoderError.DecoderErrorWithKey
+import ru.mail.decoders.UrlFormDecoderError.DecodingFailed
 import shapeless._
 import shapeless.labelled.{ field, FieldType }
 
@@ -28,7 +28,7 @@ object UrlFormDecoder {
       for {
         head <- headDecoder
                  .value(fieldValue)
-                 .leftMap(err => DecoderErrorWithKey(s"For key '$fieldKey' error: ~ ${err.msg} ~ has occurred."))
+                 .leftMap(err => DecodingFailed(s"For key '$fieldKey' error: ~ ${err.msg} ~ has occurred."))
         tail <- tailDecoder.decode(fields)
       } yield field[Key](head) :: tail
     }

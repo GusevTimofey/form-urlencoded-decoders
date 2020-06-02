@@ -5,7 +5,7 @@ import cats.instances.list._
 import cats.syntax.either._
 import cats.syntax.option._
 import cats.syntax.traverse._
-import ru.mail.decoders.UrlFormDecoderError.EmptyInput
+import ru.mail.decoders.UrlFormDecoderError.DecodingFailed
 
 trait FormDecoder[A] {
   def apply(s: List[String]): Either[UrlFormDecoderError, A]
@@ -17,7 +17,7 @@ object FormDecoder {
 
   implicit def valueFormDecoder[R](implicit d: StringDecoder[R]): FormDecoder[R] = {
     case head :: _ => d(head)
-    case Nil       => EmptyInput("No such value found").asLeft[R]
+    case Nil       => DecodingFailed("No such value found").asLeft[R]
   }
 
   implicit def optionFormDecoder[R](implicit d: StringDecoder[R]): FormDecoder[Option[R]] = {
